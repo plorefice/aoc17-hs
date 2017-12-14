@@ -2,8 +2,6 @@ data Direction = R | U | L | D deriving Eq
 type Path = [Direction]
 type Grid = [Int]
 
-{- This is probably the most inefficient piece of code ever written -}
-
 main = do
     putStrLn . ("3a: " ++) . show . manhattan origin . walk $ 277678
     putStrLn . ("3b: " ++) . show . head . dropWhile (<277678) . map (valueAt . walk) $ [1..]
@@ -13,8 +11,8 @@ origin = []
 
 spiral :: Path
 spiral =
-    let dirs  = concat . repeat $ [R,U,L,D]
-        steps = concat . map (\x -> [x,x]) $ [1..]
+    let dirs  = cycle [R,U,L,D]
+        steps = concatMap (\x -> [x,x]) [1..]
     in  concat $ zipWith replicate steps dirs
 
 walk :: Int -> Path
