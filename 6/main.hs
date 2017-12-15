@@ -7,7 +7,9 @@ type Bank  = [Block]
 main = do
     input <- getContents
     let bank = map read . words $ input :: Bank
-    print $ detectLoops bank []
+        (iterCount, loopSize) = detectLoops bank []
+    putStrLn . ("6a: " ++) . show $ iterCount
+    putStrLn . ("6b: " ++) . show $ loopSize
 
 spread :: Bank -> Bank
 spread bs =
@@ -29,7 +31,8 @@ zeroPad n xs =
         residue = (((len + n - 1) `div` n) * n) - len
     in  xs ++ (replicate residue 0)
 
-detectLoops :: Bank -> [Bank] -> Int
+detectLoops :: Bank -> [Bank] -> (Int, Int)
 detectLoops curr prevs =
-    if curr `elem` prevs then length prevs
-                         else detectLoops (spread curr) (curr : prevs)
+    case findIndex (== curr) prevs of
+        Just idx -> (length prevs, idx + 1)
+        Nothing  -> detectLoops (spread curr) (curr : prevs)
