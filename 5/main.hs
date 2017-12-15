@@ -8,33 +8,33 @@ main = do
     jumpStr <- readFile "input.txt"
     let jumpList = map read . lines $ jumpStr :: JumpList
     {- The last jump is bogus, hence the (-) 1 -}
-    putStrLn . ("5a: " ++) . show . abs . (-) 1 . solve updateProgA . newProgram $ jumpList
-    putStrLn . ("5b: " ++) . show . abs . (-) 1 . solve updateProgB . newProgram $ jumpList
+    putStrLn . ("5a: " ++) . show . abs . (-) 1 . solve instrUpdA . newProgram $ jumpList
+    putStrLn . ("5b: " ++) . show . abs . (-) 1 . solve instrUpdB . newProgram $ jumpList
 
 newProgram :: JumpList -> Program
 newProgram jl = (0, jl)
 
-updateProgA :: Program -> Program
-updateProgA (ip, jl) =
-    let next    = ip + (jl !! ip)
-        updated = map (\(i,e) -> if i == ip then e + 1 else e) $ zip [0..] jl
-    in  (next, updated)
+instrUpdA :: Int -> Int
+instrUpdA c = c + 1
 
-updateProgB :: Program -> Program
-updateProgB (ip, jl) =
+instrUpdB :: Int -> Int
+instrUpdB c = if c >= 3 then c - 1 else c + 1
+
+updateProg :: (Int -> Int) -> Program -> Program
+updateProg upd (ip, jl) =
     let current = jl !! ip
         next    = ip + current
-        instr   = if current >= 3 then current - 1 else current + 1
+        instr   = upd current
         bottom  = take ip jl
-        top     = reverse . take (length jl - ip - 1) . reverse $ jl
-    in  (next, bottom ++ (instr : top))
+        top     = drop (ip + 1) jl
+    in  (next, bottom ++ (instr : top))
 
-next :: (Program -> Program) -> Program -> Either IP Program
+next :: (Int -> Int) -> Program -> Either IP Program
 next upd (ip, jl)
     | ip >= length jl = Left ip
-    | otherwise       = Right $ upd (ip, jl)
+    | otherwise       = Right $ updateProg upd (ip, jl)
 
-solve :: (Program -> Program) -> Program -> Int
+solve :: (Int -> Int) -> Program -> Int
 solve upd prog =
     let n = case next upd prog of
             Left  _     -> 0
