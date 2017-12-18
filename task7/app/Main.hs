@@ -1,9 +1,13 @@
+module Main where
+
+import Lib
+
 import Control.Monad
 import Data.List
 
-data Proc = Proc String Int [String] deriving (Show, Eq)
 data Tree = Nil | Tree Proc [Tree] deriving (Show, Eq)
 
+main :: IO ()
 main = do
     input <- getContents
     let procs = procList . lines $ input
@@ -11,14 +15,7 @@ main = do
 
 procList :: [String] -> [Proc]
 procList [] = []
-procList (e:es) = proc : (procList es)
-    where toks     = words e
-          name     = toks !! 0
-          weight   = read . init . tail $ toks !! 1
-          children = if length toks < 3
-                     then []
-                     else map (filter (not . (==) ',')) . drop 3 $ toks
-          proc     = Proc name weight children
+procList (e:es) = parseProc e : procList es
 
 build :: [Proc] -> Tree
 build [] = Nil
