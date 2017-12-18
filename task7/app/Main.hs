@@ -14,11 +14,9 @@ main = do
     print . build $ procs
 
 procList :: [String] -> [Proc]
-procList [] = []
-procList (e:es) = parseProc e : procList es
+procList = map parseProc
 
 build :: [Proc] -> Tree
-build [] = Nil
 build pl = build' pl Nil
 
 build' :: [Proc] -> Tree -> Tree
