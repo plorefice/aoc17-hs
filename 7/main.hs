@@ -1,13 +1,13 @@
+import Control.Monad
 import Data.List
 
-data Proc  = Proc String Int [String] deriving (Show, Eq)
-data Node  = Node Proc (Maybe Node) deriving Show
-type Graph = [Node]
+data Proc = Proc String Int [String] deriving (Show, Eq)
+data Tree = Nil | Tree Proc [Tree] deriving (Show, Eq)
 
 main = do
     input <- getContents
     let procs = procList . lines $ input
-    print . root . build $ procs
+    print . build $ procs
 
 procList :: [String] -> [Proc]
 procList [] = []
@@ -20,34 +20,28 @@ procList (e:es) = proc : (procList es)
                      else map (filter (not . (==) ',')) . drop 3 $ toks
           proc     = Proc name weight children
 
-build :: [Proc] -> Graph
-build pl = build' pl . map (\p -> Node p Nothing) $ pl
+build :: [Proc] -> Tree
+build [] = Nil
+build pl = build' pl Nil
 
-build' :: [Proc] -> Graph -> Graph
-build' [] g = g
-build' (p:pl) g = build' pl $ connect p g
+build' :: [Proc] -> Tree -> Tree
+build' [] t = t
+build' (p:pl) t =
+    case insert' p t of
+        Left t'  -> build' (pl ++ [p]) t'
+        Right t' -> build' pl t'
 
-connect :: Proc -> Graph -> Graph
-connect (Proc pn pw []) g = g
-connect (Proc pn pw (c:cl)) g =
-    let (Just parentNode)  = find (\(Node (Proc name _ _) _) -> name == pn) g
-        (Just childIndex)  = findIndex (\(Node (Proc name _ _) _) -> name == c) g
-        (Node childProc _) = g !! childIndex
-        childNode          = Node childProc (Just parentNode)
-        top                = take childIndex g
-        bottom             = drop (childIndex + 1) g
-    in  connect (Proc pn pw cl) $ top ++ (childNode : bottom)
- 
-root :: Graph -> Proc
-root g = root' (g !! 0) g
-
-root' :: Node -> Graph -> Proc
-root' node@(Node proc _) g =
-    case findParent node g of
-        Nothing   -> proc
-        (Just pn) -> root' pn g
-
-findParent :: Node -> Graph -> Maybe Node
-findParent (Node _ Nothing) g = Nothing
-findParent (Node _ (Just (Node (Proc pname _ _) _))) g =
-    find (\(Node (Proc name _ _) _) -> name == pname) g
+insert' :: Proc -> Tree -> Either Tree Tree
+insert' p Nil = Right $ Tree p []
+insert' p@(Proc pn _ pc) t@(Tree p'@(Proc tn _ tc) tl)
+    | tn `elem` pc = Right $ Tree p [t]
+    | pn `elem` tc = Right $ Tree p' ((Tree p []) : tl)
+    | tl == []     = Left t
+    | otherwise    =
+        let folder acc (idx, t') = case insert' p t' of
+                                    Left _    -> acc
+                                    Right t'' -> (Just idx, t'')
+            attempt = foldl folder (Nothing, Nil) $ zip [0..] tl
+        in  case attempt of
+                (Nothing, _)   -> Left t
+                (Just idx, t') -> Right $ Tree p' (take idx tl ++ (t' : (drop (idx + 1) tl)))
