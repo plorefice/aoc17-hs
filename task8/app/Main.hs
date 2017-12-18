@@ -10,27 +10,30 @@ type Registers = M.Map Register Value
 main :: IO ()
 main = do
     input <- getContents
-    let instrs = instrList . lines $ input
-    putStrLn . ("8a: " ++) . show . maximum . M.elems . run $ instrs
+    let (regs, max) = run . instrList . lines $ input
+    putStrLn . ("8a: " ++) . show . maximum . M.elems $ regs
+    putStrLn . ("8b: " ++) . show $ max
 
 instrList :: [String] -> [Instr]
 instrList = map parseInstr
 
-run :: [Instr] -> Registers
-run instrs = run' instrs M.empty
+run :: [Instr] -> (Registers, Int)
+run instrs = run' instrs (M.empty, 0)
 
-run' :: [Instr] -> Registers -> Registers
+run' :: [Instr] -> (Registers, Int) -> (Registers, Int)
 run' [] regs = regs
-run' il'@((Instr op@(ABinary aop rs delta) (BBinary bop rc tgt)):il) regs =
+run' il'@((Instr op@(ABinary aop rs delta) (BBinary bop rc tgt)):il) (regs, max) =
     case regs M.!? rc of
-        Nothing    -> run' il' $ M.insert rc 0 regs
-        (Just val) -> if cmp bop val tgt then run' il (solve op regs)
-                                         else run' il regs
+        Nothing    -> run' il' $ (M.insert rc 0 regs, max)
+        (Just val) -> if cmp bop val tgt then run' il (step op (regs, max))
+                                         else run' il (regs, max)
 
-solve :: AExpr -> Registers -> Registers
-solve (ABinary aop rs delta) regs = M.alter f rs regs
-    where f = \case Just n  -> Just $ (arith aop) n delta
-                    Nothing -> Just $ (arith aop) 0 delta
+step :: AExpr -> (Registers, Int) -> (Registers, Int)
+step (ABinary aop rs delta) (regs, oldMax) =
+    let f = \case Just n  -> Just $ (arith aop) n delta
+                  Nothing -> Just $ (arith aop) 0 delta
+        regs' = M.alter f rs regs
+    in  (regs', max oldMax $ regs' M.! rs)
 
 arith :: ArithOp -> (Int -> Int -> Int)
 arith Lib.Inc = (+)
