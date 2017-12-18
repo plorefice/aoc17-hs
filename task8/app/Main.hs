@@ -6,7 +6,7 @@ main :: IO ()
 main = do
     input <- getContents
     let instrs = instrList . lines $ input
-    print "WIP"
+    print instrs
 
 instrList :: [String] -> [Instr]
 instrList = map parseInstr
