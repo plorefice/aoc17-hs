@@ -1,5 +1,5 @@
 module Lib
-( Instr
+( Register, Value , AExpr (..), BExpr (..) , ArithOp (..) , BoolOp (..), Instr (..)
 , parseInstr
 ) where
 
