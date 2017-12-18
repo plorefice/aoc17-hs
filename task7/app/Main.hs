@@ -11,10 +11,13 @@ main :: IO ()
 main = do
     input <- getContents
     let procs = procList . lines $ input
-    print . build $ procs
+    putStrLn . ("7a: " ++) . root . build $ procs
 
 procList :: [String] -> [Proc]
 procList = map parseProc
+
+root :: Tree -> String
+root (Tree (Proc n _ _) _) = n
 
 build :: [Proc] -> Tree
 build pl = build' pl Nil
