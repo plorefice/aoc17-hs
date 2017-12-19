@@ -16,6 +16,12 @@ type Parser = Parsec Void String
 type Id = Int
 data Process = Proc Id [Id] deriving (Show)
 
+instance Eq Process where
+    (Proc id _) == (Proc id' _) = id == id'
+
+instance Ord Process where
+    (Proc id _) `compare` (Proc id' _) = id `compare` id'
+
 parseProc :: String -> Process
 parseProc s = case parse proc "" s of
                 Left e  -> error $ show e
