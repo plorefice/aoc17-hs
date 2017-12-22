@@ -1,3 +1,4 @@
 .stack-work/
+.vscode/
 aoc17-hs.cabal
 *~

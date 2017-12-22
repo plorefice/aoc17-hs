@@ -22,7 +22,11 @@ description:         Please see the README on Github at <https://github.com/gith
 dependencies:
 - base >= 4.7 && < 5
 - megaparsec >= 6.3.0 && < 7
+- criterion
+- primitive
 - containers
+- vector
+- matrices
 - split
 
 library:
