@@ -1,8 +1,10 @@
+module Main where
+
 type Row = [Int]
 type Spreadsheet = [Row]
 
 main = do
-    input <- readFile "input.txt"
+    input <- getContents
     let sheet = parseSheet input
     putStrLn . ("2a: " ++) . show . checksumA $ sheet
     putStrLn . ("2b: " ++) . show . checksumB $ sheet

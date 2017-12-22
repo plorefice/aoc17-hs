@@ -1,8 +1,10 @@
+module Main where
+
 import Data.List
 import Data.Char
 
 main = do
-    input <- readFile "input.txt"
+    input <- getContents
     let partial = solveA $ input
         solA = if (head input) == (last input) then partial + read [(head input)] else partial
         solB = solveB $ input

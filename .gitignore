@@ -1,6 +1,3 @@
-# Build artifacts
-build/
-main
-*.hi
-*.o
-*.prof
+.stack-work/
+aoc17-hs.cabal
+*~

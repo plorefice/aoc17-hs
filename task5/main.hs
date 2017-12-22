@@ -1,3 +1,5 @@
+module Main where
+
 import Data.List
 
 type IP = Int
@@ -5,7 +7,7 @@ type JumpList = [Int]
 type Program = (IP,JumpList)
 
 main = do
-    jumpStr <- readFile "input.txt"
+    jumpStr <- getContents
     let jumpList = map read . lines $ jumpStr :: JumpList
     {- The last jump is bogus, hence the (-) 1 -}
     putStrLn . ("5a: " ++) . show . abs . (-) 1 . solve instrUpdA . newProgram $ jumpList

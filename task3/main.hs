@@ -1,3 +1,5 @@
+module Main where
+
 data Direction = R | U | L | D deriving Eq
 type Path = [Direction]
 type Grid = [Int]
