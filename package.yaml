@@ -182,3 +182,13 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - aoc17-hs
+
+  task16-exe:
+    main:                Main.hs
+    source-dirs:         task16
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - aoc17-hs
