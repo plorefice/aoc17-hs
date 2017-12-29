@@ -1,6 +1,7 @@
 module Main where
 
 import Task16
+import Data.Char
 import Data.List.Split
 import Control.Monad.Primitive
 import qualified Data.Vector as V
@@ -11,14 +12,27 @@ type Procs = MV.MVector RealWorld Char
 
 main :: IO ()
 main = do
-    input  <- getContents
-    procs  <- lineup
+    input <- getContents
+    ps    <- V.thaw . V.fromList $ ['a'..'p']
+    ps'   <- MV.clone ps
     let moves = map parseMove . splitOn "," $ input
-    procs' <- mapM_ (perform procs) moves >> V.freeze procs
-    putStrLn . ("16a: " ++) . show $ procs'
+    taskA ps' moves
+    taskB ps moves
 
-lineup :: IO (Procs)
-lineup = V.thaw . V.fromList $ ['a'..'p']
+taskA :: Procs -> [Move] -> IO ()
+taskA ps moves = do
+    ps' <- routine ps moves >> V.freeze ps
+    putStrLn . ("16a: " ++) . show $ ps'
+
+taskB :: Procs -> [Move] -> IO ()
+taskB ps moves = do
+    ps' <- MV.clone ps
+    n   <- cycles ps' moves
+    ps' <- mapM_ (\_ -> routine ps moves) [1..(1000000000 `mod` n)] >> V.freeze ps
+    putStrLn . ("16b: " ++) . show $ ps'
+
+routine :: Procs -> [Move] -> IO ()
+routine ps moves = mapM_ (perform ps) moves
 
 perform :: Procs -> Move -> IO ()
 perform ps (Spin n) = spin ps n
@@ -41,3 +55,11 @@ partner ps a b = do
     let (Just a') = V.findIndex (== a) ps'
         (Just b') = V.findIndex (== b) ps'
     MV.swap ps a' b'
+
+cycles :: Procs -> [Move] -> IO (Int)
+cycles ps moves = do
+    tgt <- V.freeze ps
+    go 1 tgt
+    where go n tgt = do
+            ps' <- routine ps moves >> V.freeze ps
+            if ps' == tgt then return n else go (n+1) tgt
