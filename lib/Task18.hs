@@ -1,5 +1,5 @@
 module Task18
-( Instr (..)
+( Instr (..), Register, Expr (..)
 , parseInstr
 ) where
 
@@ -17,7 +17,7 @@ type Register = Char
 
 data Expr
   = Reg Register
-  | IntConst Int
+  | Val Int
   deriving (Show, Eq)
 
 data Instr
@@ -56,7 +56,7 @@ value :: Parser Int
 value = L.signed sc $ lexeme L.decimal
 
 expr :: Parser Expr
-expr = (IntConst <$> value) <|> (Reg <$> reg)
+expr = (Val <$> value) <|> (Reg <$> reg)
 
 sound :: Parser Instr
 sound = do
