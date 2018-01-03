@@ -21,13 +21,13 @@ data Expr
   deriving (Show, Eq)
 
 data Instr
-  = Snd Register
+  = Snd Expr
   | Set Register Expr
   | Add Register Expr
   | Mul Register Expr
   | Mod Register Expr
   | Rcv Register
-  | Jgz Register Expr
+  | Jgz Expr Expr
   deriving (Show, Eq)
 
 parseInstr :: String -> Instr
@@ -61,8 +61,8 @@ expr = (Val <$> value) <|> (Reg <$> reg)
 sound :: Parser Instr
 sound = do
     symbol "snd"
-    r <- reg
-    return $ Snd r
+    e <- expr
+    return $ Snd e
 
 set :: Parser Instr
 set = do
@@ -101,9 +101,9 @@ rcv = do
 jgz :: Parser Instr
 jgz = do
     symbol "jgz"
-    r <- reg
-    e <- expr
-    return $ Jgz r e
+    e1 <- expr
+    e2 <- expr
+    return $ Jgz e1 e2
 
 instr :: Parser Instr
 instr = sound <|> set <|> add <|> mul <|> modul <|> rcv <|> jgz
