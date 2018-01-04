@@ -1,6 +1,6 @@
 module Task20
 ( Vec3
-, Particle
+, Particle (..)
 , parseParticle
 ) where
 
