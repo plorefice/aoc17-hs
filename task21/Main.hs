@@ -4,42 +4,31 @@ module Main where
 import Debug.Trace
 import Data.List
 import Data.List.Split (splitOn, chunksOf)
-import qualified "matrix" Data.Matrix as M
 
-type Pattern = M.Matrix Char
+type Pattern = [[Char]]
 type Rule    = (Pattern, Pattern)
 
 main :: IO ()
 main = do
   input <- getContents
-  let rules = map toRule . lines $ input
-      go n  = foldr ($) (M.fromLists [".#.","..#","###"]) $ [ apply rules | _ <- [1..n] ]
-  putStrLn . ("21a: " ++) . show . foldl (\n c -> if c == '#' then n + 1 else n) 0 . go $ 5
+  let rules  = map toRule . lines $ input
+      go n   = iterate (step rules) [".#.","..#","###"] !! n
+      pixels = sum . map (length . filter (== '#'))
+  putStrLn . ("21a: " ++) . show . pixels . go $ 5
+  putStrLn . ("21b: " ++) . show . pixels . go $ 18
 
 toRule :: String -> Rule
-toRule s = (f pi, f po)
-  where (pi:po:[]) = splitOn " => " s
-        f = M.fromLists . splitOn "/"
+toRule s = (a, b) where (a:b:[]) = map (splitOn "/") . splitOn " => " $ s
 
-size :: Pattern -> Int
-size = M.nrows
+step :: [Rule] -> Pattern -> Pattern
+step rs p = assemble n . map (map $ subst rs) . zoom n $ p
+  where n = 2 + mod (length p) 2
 
-apply :: [Rule] -> Pattern -> Pattern
-apply rs p
-  | size p `mod` 2 == 0 = apply' 2 $ p </> 2
-  | size p `mod` 3 == 0 = apply' 3 $ p </> 3
-  where apply' n = foldl1 (M.<->)
-                 . map (foldl1 (M.<|>))
-                 . chunksOf (size p `div` n)
-                 . map (subst rs)
+zoom :: Int -> Pattern -> [[Pattern]]
+zoom n = map (transpose . map (chunksOf n)) . chunksOf n
 
-(</>) :: Pattern -> Int -> [Pattern]
-p </> n = go (1,1) (size p)
-  where go (r,c) s
-          | r > s     = []
-          | otherwise = M.submatrix r r' c c' p : go (r + n*(c' `div` s), (c'+1) `mod` s) s
-                        where r' = r + n - 1
-                              c' = c + n - 1
+assemble :: Int -> [[Pattern]] -> Pattern
+assemble n = concatMap (\ps -> map (flip concatMap ps . flip (!!)) [0..n])
 
 subst :: [Rule] -> Pattern -> Pattern
 subst rs p = snd r where (Just r) = find ((`elem` ts) . fst) rs
@@ -47,8 +36,8 @@ subst rs p = snd r where (Just r) = find ((`elem` ts) . fst) rs
 
 transforms :: [Pattern -> Pattern]
 transforms = (.) <$> [ id, flipr, flipc ] <*> [ r90, r180, r270 ]
-             where flipr = M.fromLists . reverse . M.toLists
-                   flipc = M.fromLists . map reverse . M.toLists
-                   r90   = flipr . M.transpose
+             where flipr = reverse
+                   flipc = map reverse
+                   r90   = flipr . transpose
                    r180  = flipc . flipr
-                   r270  = flipc . M.transpose
+                   r270  = flipc . transpose
