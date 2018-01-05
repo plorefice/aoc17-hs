@@ -1,5 +1,5 @@
 module Task20
-( Vec3
+( Vec3 (..)
 , Particle (..)
 , parseParticle
 ) where
@@ -12,13 +12,13 @@ import qualified Text.Megaparsec.Char.Lexer as L
 
 type Parser = Parsec Void String
 
-type Vec3 = (Int, Int, Int)
+type Vec3 a = (a, a, a)
 
 data Particle
   = Particle
-  { pos :: Vec3
-  , vel :: Vec3
-  , acc :: Vec3
+  { pos :: Vec3 Float
+  , vel :: Vec3 Float
+  , acc :: Vec3 Float
   } deriving (Show)
 
 parseParticle :: String -> Particle
@@ -39,10 +39,10 @@ symbol = L.symbol sc
 
 {- Grammar parsing functions -}
 
-value :: Parser Int
+value :: Parser Integer
 value = let integer = lexeme L.decimal in L.signed sc integer
 
-vec3 :: Parser Vec3
+vec3 :: Parser (Vec3 Float)
 vec3 = do
   symbol "<"
   x <- value
@@ -51,7 +51,7 @@ vec3 = do
   symbol ","
   z <- value
   symbol ">"
-  return $ (x,y,z)
+  return $ (fromInteger x, fromInteger y, fromInteger z)
 
 particle :: Parser Particle
 particle = do
