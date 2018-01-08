@@ -25,10 +25,11 @@ dependencies:
 - criterion
 - primitive
 - containers
+- hashtables
 - vector
 - matrices
-- matrix
 - split
+- monad-loops
 
 library:
   source-dirs: lib
@@ -237,6 +238,16 @@ executables:
   task21-exe:
     main:                Main.hs
     source-dirs:         task21
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - aoc17-hs
+
+  task22-exe:
+    main:                Main.hs
+    source-dirs:         task22
     ghc-options:
     - -threaded
     - -rtsopts
