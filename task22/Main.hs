@@ -16,8 +16,11 @@ main :: IO ()
 main = do
   input <- getContents
   grid <- fromInput input
-  (_,_,infections) <- iterN (burst grid) (N, (0,0), 0) 10000
+  (_,_,infections)  <- iterN (burst infect grid) (N, (0,0), 0) 10000
   putStrLn . ("22a: " ++) . show $ infections
+  grid <- fromInput input
+  (_,_,infections') <- iterN (burst infect' grid) (N, (0,0), 0) 10000000
+  putStrLn . ("22b: " ++) . show $ infections'
 
 iterN :: Monad m => (a -> m a) -> a -> Int -> m a
 iterN f x n = case n of
@@ -35,25 +38,37 @@ fromInput s = do
   mapM_ (\(x,xs') -> mapM_ (\(y,v) -> H.insert g (x,y) v) $ zip ry xs') $ zip rx xs
   return g
 
-burst :: Grid -> Virus -> IO (Virus)
-burst g v@(d,p,inf) = do
+burst :: (Grid -> Virus -> IO (Virus)) -> Grid -> Virus -> IO (Virus)
+burst f g v@(d,p,inf) = do
   node' <- H.lookup g p
   case node' of
-    Nothing   -> H.insert g p '.' >> burst g v
-    Just node -> infect g (turn d node, p, inf) >>= step g
+    Nothing   -> H.insert g p '.' >> burst f g v
+    Just node -> f g (turn d node, p, inf) >>= step g
 
 turn :: Direction -> Node -> Direction
 turn d n
-  | n == '#' = let (Just idx) = elemIndex d dirs in dirs !! ((idx + 1) `mod` 4)
-  | n == '.' = let (Just idx) = elemIndex d dirs in dirs !! ((idx - 1) `mod` 4)
-  where dirs = [N,E,S,W]
+  | n == '#' = turn 1
+  | n == '.' = turn (-1)
+  | n == 'W' = turn 0
+  | n == 'F' = turn 2
+  where turn n = let (Just idx) = elemIndex d dirs in dirs !! ((idx + n) `mod` 4)
+        dirs = [N,E,S,W]
 
 infect :: Grid -> Virus -> IO (Virus)
 infect g (d,p,inf) = do
   (Just node) <- H.lookup g p
   case node of
-    '#' -> H.insert g p '.' >> return (d,p,inf)
-    '.' -> H.insert g p '#' >> return (d,p,inf+1)
+    '#' -> H.insert g p '.' >> return (d, p, inf)
+    '.' -> H.insert g p '#' >> return (d, p, inf+1)
+
+infect' :: Grid -> Virus -> IO (Virus)
+infect' g (d,p,inf) = do
+  (Just node) <- H.lookup g p
+  case node of
+    '#' -> H.insert g p 'F' >> return (d, p, inf)
+    '.' -> H.insert g p 'W' >> return (d, p, inf)
+    'W' -> H.insert g p '#' >> return (d, p, inf+1)
+    'F' -> H.insert g p '.' >> return (d, p, inf)
 
 step :: Grid -> Virus -> IO (Virus)
 step _ (d, (x,y), inf) = return (d,p',inf)
