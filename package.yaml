@@ -265,3 +265,13 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - aoc17-hs
+
+  task24-exe:
+    main:                Main.hs
+    source-dirs:         task24
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - aoc17-hs
