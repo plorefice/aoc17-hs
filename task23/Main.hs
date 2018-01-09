@@ -2,7 +2,7 @@ module Main where
 
 import Task23
 
-import Debug.Trace
+import Data.Numbers.Primes
 import qualified Data.Map as M
 
 data Process
@@ -17,6 +17,7 @@ main = do
   input <- getContents
   let program = map parseInstr . lines $ input
   putStrLn . ("23a: " ++) . show . muls . run program $ proc
+  putStrLn . ("23b: " ++) . show . length . filter (not . isPrime) $ [109300,109317..126300]
 
 proc :: Process
 proc = Process { ip   = 0

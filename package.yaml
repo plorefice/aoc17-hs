@@ -30,6 +30,7 @@ dependencies:
 - matrices
 - split
 - monad-loops
+- primes
 
 library:
   source-dirs: lib
