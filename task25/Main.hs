@@ -36,37 +36,29 @@ data Program
 sample :: Blueprint
 sample = Blueprint { initialState = 0
                    , steps        = 6
-                   , states       = [ State
-                                        ( Operations 1 (+) 1 )
-                                        ( Operations 0 (-) 1 )
-                                    , State
-                                        ( Operations 1 (-) 0 )
-                                        ( Operations 1 (+) 0 )
+                   , states       = [ State ( Operations 1 (+) 1 )
+                                            ( Operations 0 (-) 1 )
+                                    , State ( Operations 1 (-) 0 )
+                                            ( Operations 1 (+) 0 )
                                     ]
                    }
 
 input :: Blueprint
 input = Blueprint { initialState = 0
                   , steps        = 12172063
-                  , states       = [ State
-                                        ( Operations 1 (+) 1 )
-                                        ( Operations 0 (-) 2 )
-                                    , State
-                                        ( Operations 1 (-) 0 )
-                                        ( Operations 1 (-) 3 )
-                                    , State
-                                        ( Operations 1 (+) 3 )
-                                        ( Operations 0 (+) 2 )
-                                    , State
-                                        ( Operations 0 (-) 1 )
-                                        ( Operations 0 (+) 4 )
-                                    , State
-                                        ( Operations 1 (+) 2 )
-                                        ( Operations 1 (-) 5 )
-                                    , State
-                                        ( Operations 1 (-) 4 )
-                                        ( Operations 1 (+) 0 )
-                                    ]
+                  , states       = [ State ( Operations 1 (+) 1 )
+                                           ( Operations 0 (-) 2 )
+                                   , State ( Operations 1 (-) 0 )
+                                           ( Operations 1 (-) 3 )
+                                   , State ( Operations 1 (+) 3 )
+                                           ( Operations 0 (+) 2 )
+                                   , State ( Operations 0 (-) 1 )
+                                           ( Operations 0 (+) 4 )
+                                   , State ( Operations 1 (+) 2 )
+                                           ( Operations 1 (-) 5 )
+                                   , State ( Operations 1 (-) 4 )
+                                           ( Operations 1 (+) 0 )
+                                   ]
                   }
 
 main :: IO ()
@@ -101,9 +93,9 @@ step p @ Program { tape      = t
     let (Operations val dir next) = if val' == 0 then op0 else op1
     H.insert t c val
     return $ p { cursor    = c `dir` 1
-                , remSteps  = rs - 1
-                , st        = states bp !! next
-                }
+               , remSteps  = rs - 1
+               , st        = states bp !! next
+               }
 
 tapeAt :: Tape -> Int -> IO (Int)
 tapeAt t c = do
